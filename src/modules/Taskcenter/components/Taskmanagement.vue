@@ -50,9 +50,9 @@ export type Task = {
   logs: EventItem[]         // 操作日志（最新的在前）
 }
 
-// ============================================================
+
 // 3. 文案配置 - 集中管理所有显示文本，便于国际化和维护
-// ============================================================
+
 
 /** 界面通用文案 */
 const text = {
@@ -111,7 +111,7 @@ const labels = {
 /** 任务列表数据（模拟数据） */
 const tasks = ref<Task[]>([
   makeTask('TASK-001', '重点区域巡检', '视频流 / 传感器', '东区', '2026-08-12 09:00', '2026-08-12 12:00', 'high', '张明', 'running'),
-  makeTask('TASK-002', '设施异常检测', '设备台账', '南区', '2026-08-13 10:00', '2026-08-13 18:00', 'medium', '李娜', 'ready'),
+  makeTask('TASK-002', '设施异常检测', '传感器', '南区', '2026-08-13 10:00', '2026-08-13 18:00', 'medium', '李娜', 'ready'),
 ])
 
 const loading = ref(false)           // 加载状态
@@ -159,12 +159,12 @@ const ownerOptions = computed(() => {
  */
 const filteredTasks = computed(() => {
   return tasks.value.filter((task) => {
-    
+
     const query = keyword.value.trim().toLowerCase()//去掉空格转为小写
     const matchedQuery = !query || [task.name, task.target, task.owner].some((value) => {
       return value.toLowerCase().includes(query)//转小写，判断关键字（query）是否在value中）
     })
-    
+
     // 组合所有筛选条件
     return matchedQuery &&
       (!statusFilter.value || task.status === statusFilter.value) &&
@@ -179,7 +179,7 @@ const filteredTasks = computed(() => {
  */
 const displayedTasks = computed(() => {
   const list = [...filteredTasks.value]
-  
+
   // 排序
   if (sort.value.prop && sort.value.order) {
     const prop = sort.value.prop
@@ -188,7 +188,7 @@ const displayedTasks = computed(() => {
       return sort.value.order === 'ascending' ? result : -result
     })
   }
-  
+
   // 分页切割
   const start = (currentPage.value - 1) * pageSize.value
   const end = currentPage.value * pageSize.value
@@ -336,8 +336,8 @@ function priorityType(priority: Priority) {
 function statusType(status: Status) {
   return status === 'running' || status === 'completed' ? 'success'
     : status === 'paused' ? 'warning'
-    : status === 'ready' ? 'primary'
-    : 'info'
+      : status === 'ready' ? 'primary'
+        : 'info'
 }
 </script>
 
@@ -348,66 +348,32 @@ function statusType(status: Status) {
     <!-- ============================================ -->
     <div class="task-management__toolbar">
       <h1>{{ text.title }}</h1>
-      
+
       <div class="task-management__filters">
         <!-- 关键词搜索框 -->
-        <el-input
-          v-model="keyword"
-          clearable
-          :placeholder="text.search"
-          @input="resetPage"
-        />
-        
+        <el-input v-model="keyword" clearable :placeholder="text.search" @input="resetPage" />
+
         <!-- 状态筛选下拉 -->
-        <el-select
-          v-model="statusFilter"
-          clearable
-          :placeholder="text.status"
-          @change="resetPage"
-        >
-          <el-option
-            v-for="status in statusOptions"
-            :key="status"
-            :label="labels.status[status]"
-            :value="status"
-          />
+        <el-select v-model="statusFilter" clearable :placeholder="text.status" @change="resetPage">
+          <el-option v-for="status in statusOptions" :key="status" :label="labels.status[status]" :value="status" />
         </el-select>
-        
+
         <!-- 优先级筛选下拉 -->
-        <el-select
-          v-model="priorityFilter"
-          clearable
-          :placeholder="text.priority"
-          @change="resetPage"
-        >
-          <el-option
-            v-for="priority in priorityOptions"
-            :key="priority"
-            :label="labels.priority[priority]"
-            :value="priority"
-          />
+        <el-select v-model="priorityFilter" clearable :placeholder="text.priority" @change="resetPage">
+          <el-option v-for="priority in priorityOptions" :key="priority" :label="labels.priority[priority]"
+            :value="priority" />
         </el-select>
-        
+
         <!-- 负责人筛选下拉 -->
-        <el-select
-          v-model="ownerFilter"
-          clearable
-          :placeholder="text.owner"
-          @change="resetPage"
-        >
-          <el-option
-            v-for="owner in ownerOptions"
-            :key="owner"
-            :label="owner"
-            :value="owner"
-          />
+        <el-select v-model="ownerFilter" clearable :placeholder="text.owner" @change="resetPage">
+          <el-option v-for="owner in ownerOptions" :key="owner" :label="owner" :value="owner" />
         </el-select>
-        
+
         <!-- 操作按钮 -->
         <el-button :loading="loading" @click="refresh">
           {{ text.refresh }}
         </el-button>
-        
+
         <el-button type="primary" @click="openCreate">
           {{ text.create }}
         </el-button>
@@ -417,112 +383,63 @@ function statusType(status: Status) {
     <!-- ============================================ -->
     <!-- 任务列表表格 -->
     <!-- ============================================ -->
-    <el-table
-      v-loading="loading"
-      :data="displayedTasks"
-      class="task-management__table"
-      height="100%"
-      @sort-change="handleSort"
-    >
+    <el-table v-loading="loading" :data="displayedTasks" class="task-management__table" height="100%"
+      @sort-change="handleSort">
       <!-- 任务名称列 -->
-      <el-table-column
-        prop="name"
-        :label="text.name"
-        min-width="150"
-        sortable="custom"
-      />
-      
+      <el-table-column prop="name" :label="text.name" min-width="150" sortable="custom" />
+
       <!-- 监测对象列 -->
-      <el-table-column
-        prop="target"
-        :label="text.target"
-        min-width="140"
-        sortable="custom"
-      />
-      
+      <el-table-column prop="target" :label="text.target" min-width="140" sortable="custom" />
+
       <!-- 任务区域列 -->
-      <el-table-column
-        prop="area"
-        :label="text.area"
-        width="110"
-        sortable="custom"
-      />
-      
+      <el-table-column prop="area" :label="text.area" width="110" sortable="custom" />
+
       <!-- 执行时间列：显示开始时间 ~ 结束时间 -->
-      <el-table-column
-        prop="startTime"
-        :label="text.time"
-        min-width="170"
-        sortable="custom"
-      >
+      <el-table-column prop="startTime" :label="text.time" min-width="170" sortable="custom">
         <template #default="{ row }">
           <span>{{ row.startTime }}</span>
           <small>{{ text.until }} {{ row.endTime }}</small>
         </template>
       </el-table-column>
-      
+
       <!-- 优先级列：使用标签显示 -->
-      <el-table-column
-        prop="priority"
-        :label="text.priorityColumn"
-        width="90"
-        sortable="custom"
-      >
+      <el-table-column prop="priority" :label="text.priorityColumn" width="90" sortable="custom">
         <template #default="{ row }">
           <el-tag :type="priorityType(row.priority)">
             {{ priorityLabel(row.priority) }}
           </el-tag>
         </template>
       </el-table-column>
-      
+
       <!-- 负责人列 -->
-      <el-table-column
-        prop="owner"
-        :label="text.ownerColumn"
-        width="100"
-        sortable="custom"
-      />
-      
+      <el-table-column prop="owner" :label="text.ownerColumn" width="100" sortable="custom" />
+
       <!-- 状态列：使用标签显示 -->
-      <el-table-column
-        prop="status"
-        :label="text.statusColumn"
-        width="105"
-        sortable="custom"
-      >
+      <el-table-column prop="status" :label="text.statusColumn" width="105" sortable="custom">
         <template #default="{ row }">
           <el-tag :type="statusType(row.status)">
             {{ statusLabel(row.status) }}
           </el-tag>
         </template>
       </el-table-column>
-      
+
       <!-- 创建时间列 -->
-      <el-table-column
-        prop="createdAt"
-        :label="text.createdAt"
-        min-width="150"
-        sortable="custom"
-      />
-      
+      <el-table-column prop="createdAt" :label="text.createdAt" min-width="150" sortable="custom" />
+
       <!-- 操作列：固定在右侧 -->
-      <el-table-column
-        :label="text.actions"
-        width="200"
-        fixed="right"
-      >
+      <el-table-column :label="text.actions" width="200" fixed="right">
         <template #default="{ row }">
           <div class="task-management__actions">
             <!-- 查看详情 -->
             <el-button link type="primary" @click="openDetail(row)">
               {{ text.view }}
             </el-button>
-            
+
             <!-- 编辑 -->
             <el-button link type="primary" @click="openEdit(row)">
               {{ text.edit }}
             </el-button>
-            
+
             <!-- 删除 -->
             <el-button link type="danger" @click="removeTask(row)">
               {{ text.remove }}
@@ -530,7 +447,7 @@ function statusType(status: Status) {
           </div>
         </template>
       </el-table-column>
-      
+
       <!-- 空状态 -->
       <template #empty>
         <el-empty :description="text.empty" />
@@ -541,31 +458,18 @@ function statusType(status: Status) {
     <!-- 分页组件 -->
     <!-- ============================================ -->
     <div class="task-management__pagination">
-      <el-pagination
-        v-model:current-page="currentPage"
-        v-model:page-size="pageSize"
-        :total="filteredTasks.length"
-        :page-sizes="[5, 8, 12]"
-        layout="total, sizes, prev, pager, next"
-      />
+      <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="filteredTasks.length"
+        :page-sizes="[5, 8, 12]" layout="total, sizes, prev, pager, next" />
     </div>
 
     <!-- ============================================ -->
     <!-- 弹窗和抽屉组件 -->
     <!-- ============================================ -->
     <!-- 创建/编辑任务弹窗 -->
-    <TaskFormDialog
-      v-model="formVisible"
-      :mode="formMode"
-      :task="editingTask"
-      @save="saveTask"
-    />
-    
+    <TaskFormDialog v-model="formVisible" :mode="formMode" :task="editingTask" @save="saveTask" />
+
     <!-- 任务详情抽屉 -->
-    <TaskDetailDrawer
-      v-model="drawerVisible"
-      :task="selectedTask"
-    />
+    <TaskDetailDrawer v-model="drawerVisible" :task="selectedTask" />
   </section>
 </template>
 
@@ -576,8 +480,10 @@ function statusType(status: Status) {
 
 .task-management {
   display: flex;
-  height: 100%;          /* 撑满父容器 */
-  min-height: 0;         /* 防止flex溢出 */
+  height: 100%;
+  /* 撑满父容器 */
+  min-height: 0;
+  /* 防止flex溢出 */
   flex-direction: column;
   gap: 14px;
   padding: 16px;
@@ -638,6 +544,7 @@ small {
 /* ============================================ */
 
 @media (max-width: 1100px) {
+
   /* 小屏幕下筛选器变为两列 */
   .task-management__filters {
     grid-template-columns: repeat(2, minmax(160px, 1fr));

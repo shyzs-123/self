@@ -55,7 +55,7 @@ const tableData = ref<Version[]>([
     versionNo: '1.2',
     releaseTime: '2026-08-12',
     modifier: 'wangling',
-    changeContent: '优化了数据处理逻辑，修复了已知问题，提升了系统性能',
+    changeContent: '内容内容内容内容内容内容内容内容内容',
     referencedTaskCount: 8,
     description: '测试版本说明',
     systemName: '指标体系V1',
@@ -73,7 +73,7 @@ const tableData = ref<Version[]>([
     versionNo: '1.1',
     releaseTime: '2026-08-12',
     modifier: 'wangling',
-    changeContent: '新增了数据分析功能',
+    changeContent: '数据分析功能内容内容内容内容内容内容内容',
     referencedTaskCount: 8,
     description: '历史版本',
     systemName: '指标体系V1',
@@ -140,7 +140,7 @@ const handleEditVersion = (row: Version) => {
 // ✅ 保存版本 - 核心逻辑
 const handleSaveVersion = (version: Version) => {
   console.log('保存版本数据:', version)
-  
+
   if (versionDialogMode.value === 'create') {
     // ✅ 新建：添加到列表最前面（最新版本显示在最前）
     tableData.value.unshift(version)
@@ -157,7 +157,7 @@ const handleSaveVersion = (version: Version) => {
       ElMessage.error('未找到要更新的版本')
     }
   }
-  
+
   // 关闭弹窗
   versionDialogVisible.value = false
 }
@@ -167,16 +167,12 @@ const handleSaveVersion = (version: Version) => {
   <section class="indicator-management">
     <!-- 标题和操作栏 -->
     <div class="indicator-management__header">
-      <h1 class="indicator-management__title">指标体系</h1>
+      <h1 class="indicator-management__title">版本管理</h1>
       <el-button type="primary" @click="handleCreateVersion">新建版本</el-button>
     </div>
 
     <!-- 表格 -->
-    <el-table
-      :data="tableData"
-      :default-sort="{ prop: 'releaseTime', order: 'descending' }"
-      style="width: 100%"
-    >
+    <el-table :data="tableData" :default-sort="{ prop: 'releaseTime', order: 'descending' }" style="width: 100%">
       <el-table-column prop="versionNo" label="版本" sortable width="100" />
       <el-table-column prop="releaseTime" label="发布时间" width="120" />
       <el-table-column label="修改内容" min-width="200">
@@ -211,12 +207,8 @@ const handleSaveVersion = (version: Version) => {
     <VersionDrawer v-model="drawerVisible" :row-data="selectRow" />
 
     <!-- 版本表单弹窗 -->
-    <VersionFormDialog 
-      v-model="versionDialogVisible"
-      :mode="versionDialogMode"
-      :version="currentEditVersion"
-      @save="handleSaveVersion"
-    />
+    <VersionFormDialog v-model="versionDialogVisible" :mode="versionDialogMode" :version="currentEditVersion"
+      @save="handleSaveVersion" />
   </section>
 </template>
 

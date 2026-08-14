@@ -25,7 +25,7 @@ type Task = {
   logs: EventItem[]
 }
 
-/** 表单数据类型（排除自动生成的字段） */
+
 type FormData = Omit<Task, 'id' | 'status' | 'createdAt' | 'lifecycle' | 'logs'>
 
 // ==================== Props & Emits ====================
@@ -85,7 +85,7 @@ const visible = computed({
   set: (value) => emit('update:modelValue', value)
 })
 
-const title = computed(() => 
+const title = computed(() =>
   props.mode === 'create' ? text.create : text.edit
 )
 
@@ -139,15 +139,15 @@ function reset() {
 /** 监听弹窗打开/关闭 */
 watch(() => props.modelValue, (opened) => {
   if (!opened) return
-  
+
   // 重置表单
   reset()
-  
+
   // 如果是编辑模式，填充数据
   if (props.task) {
     Object.assign(form, props.task)
   }
-  
+
   // 清除验证状态
   window.setTimeout(() => formRef.value?.clearValidate(), 0)
 })
@@ -160,13 +160,13 @@ function close() {
 /** 保存任务 */
 async function save() {
   if (!formRef.value) return
-  
+
   // 表单验证
   await formRef.value.validate()
-  
+
   const now = new Date().toLocaleString('zh-CN', { hour12: false })
   const previous = props.task
-  
+
   // 构建完整的任务数据    子向父提交  详细内容？
   emit('save', {
     id: previous?.id ?? `TASK-${Date.now()}`,
@@ -176,135 +176,84 @@ async function save() {
     lifecycle: previous?.lifecycle ?? [
       { title: '创建', time: now, content: '任务已创建' }
     ],
-    logs: previous 
+    logs: previous
       ? [
-          { title: '任务编辑', time: now, content: '更新任务信息' },
-          ...previous.logs
-        ]
+        { title: '任务编辑', time: now, content: '更新任务信息' },
+        ...previous.logs
+      ]
       : [
-          { title: '任务创建', time: now, content: '保存新建任务' }
-        ]
+        { title: '任务创建', time: now, content: '保存新建任务' }
+      ]
   })
-  
+
   close()
 }
 </script>
 
 <template>
-  <el-dialog 
-    v-model="visible" 
-    :title="title" 
-    width="680px" 
-    destroy-on-close
-  >
-    <el-form 
-      ref="formRef" 
-      :model="form" 
-      :rules="rules" 
-      label-width="92px" 
-      label-position="left"
-    >
+  <el-dialog v-model="visible" :title="title" width="680px" destroy-on-close>
+    <el-form ref="formRef" :model="form" :rules="rules" label-width="92px" label-position="left">
       <!-- 任务名称 -->
       <el-form-item :label="text.name" prop="name">
         <el-input v-model="form.name" :placeholder="text.input" />
       </el-form-item>
-      
+
       <!-- 监测对象 -->
       <el-form-item :label="text.target" prop="target">
         <el-input v-model="form.target" :placeholder="text.input" />
       </el-form-item>
-      
+
       <!-- 任务区域 + 优先级（两列布局） -->
       <div class="grid">
         <el-form-item :label="text.area" prop="area">
           <el-select v-model="form.area" :placeholder="text.select">
-            <el-option 
-              v-for="area in areas" 
-              :key="area" 
-              :label="area" 
-              :value="area" 
-            />
+            <el-option v-for="area in areas" :key="area" :label="area" :value="area" />
           </el-select>
         </el-form-item>
-        
+
         <el-form-item :label="text.priority" prop="priority">
           <el-select v-model="form.priority" :placeholder="text.select">
-            <el-option 
-              v-for="item in priorities" 
-              :key="item.value" 
-              :label="item.label" 
-              :value="item.value" 
-            />
+            <el-option v-for="item in priorities" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
       </div>
-      
+
       <!-- 开始时间 + 结束时间（两列布局） -->
       <div class="grid">
         <el-form-item :label="text.start" prop="startTime">
-          <el-date-picker 
-            v-model="form.startTime" 
-            type="datetime" 
-            :placeholder="text.select" 
-            format="YYYY-MM-DD HH:mm" 
-            value-format="YYYY-MM-DD HH:mm" 
-          />
+          <el-date-picker v-model="form.startTime" type="datetime" :placeholder="text.select" format="YYYY-MM-DD HH:mm"
+            value-format="YYYY-MM-DD HH:mm" />
         </el-form-item>
-        
+
         <el-form-item :label="text.end" prop="endTime">
-          <el-date-picker 
-            v-model="form.endTime" 
-            type="datetime" 
-            :placeholder="text.select" 
-            format="YYYY-MM-DD HH:mm" 
-            value-format="YYYY-MM-DD HH:mm" 
-          />
+          <el-date-picker v-model="form.endTime" type="datetime" :placeholder="text.select" format="YYYY-MM-DD HH:mm"
+            value-format="YYYY-MM-DD HH:mm" />
         </el-form-item>
       </div>
-      
+
       <!-- 负责人 -->
       <el-form-item :label="text.owner" prop="owner">
         <el-select v-model="form.owner" :placeholder="text.select">
-          <el-option 
-            v-for="owner in owners" 
-            :key="owner" 
-            :label="owner" 
-            :value="owner" 
-          />
+          <el-option v-for="owner in owners" :key="owner" :label="owner" :value="owner" />
         </el-select>
       </el-form-item>
-      
+
       <!-- 成果要求 -->
       <el-form-item :label="text.result" prop="resultRequirement">
-        <el-input 
-          v-model="form.resultRequirement" 
-          type="textarea" 
-          :rows="3" 
-          :placeholder="text.input" 
-        />
+        <el-input v-model="form.resultRequirement" type="textarea" :rows="3" :placeholder="text.input" />
       </el-form-item>
-      
+
       <!-- 约束条件 -->
       <el-form-item :label="text.constraints" prop="constraints">
-        <el-input 
-          v-model="form.constraints" 
-          type="textarea" 
-          :rows="3" 
-          :placeholder="text.input" 
-        />
+        <el-input v-model="form.constraints" type="textarea" :rows="3" :placeholder="text.input" />
       </el-form-item>
-      
+
       <!-- 备注 -->
       <el-form-item :label="text.remark" prop="remark">
-        <el-input 
-          v-model="form.remark" 
-          type="textarea" 
-          :rows="2" 
-          :placeholder="text.input" 
-        />
+        <el-input v-model="form.remark" type="textarea" :rows="2" :placeholder="text.input" />
       </el-form-item>
     </el-form>
-    
+
     <!-- 底部按钮 -->
     <template #footer>
       <el-button @click="close">{{ text.cancel }}</el-button>

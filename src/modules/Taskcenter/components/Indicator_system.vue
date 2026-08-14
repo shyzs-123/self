@@ -1,156 +1,287 @@
- <script setup lang="ts">
-import { ref } from 'vue'
-import TaskDetailModal from '@/modules/Taskcenter/Hooks/task_view.vue'
-
-const modalRef = ref<InstanceType<typeof TaskDetailModal>>()
-
-const handleView = (Indicator: any) => {
-  modalRef.value?.open(Indicator)
-}
-
-type IndicatorStatus = '进行中' | '待审核' | '已完成'
-
-type IndicatorItem = {
-  version:string,
-  time: string,
-  fuzeren: string,
-  content: string,
-  cite: Number,
-  status: IndicatorStatus
-}
-
-const indicators: IndicatorItem[] = [
-  {
-    version:'1.2',
-    time: '2026-08-12',
-    fuzeren: 'wangling',
-    content: 'wuhan',
-    cite: 8,
-    status: '进行中'
-  }
-]
-
-const statusClassMap: Record<IndicatorStatus, string> = {
-  进行中: 'status--running',
-  待审核: 'status--pending',
-  已完成: 'status--done',
-}
-</script>
-
 <template>
-  <section class="indicator-management">
-    <h1 class="indicator-management__title">指标体系</h1>
+  <div class="page-wrap">
+    <!-- 顶部标题 -->
+    <div class="toolbar-slot">指标体系管理</div>
 
-    <div class="indicator-management__table-wrap">
-      <table class="indicator-management__table">
-        <thead>
-          <tr>
-            <th>版本号</th>
-            <th>发布时间</th>
-            <th>修改人</th>
-            <th>修改内容</th>
-            <th>引用任务数量</th>
-            <th>状态</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="indicator in indicators" :key="indicator.version">
-            <td>{{ indicator.version }}</td>
-            <td>{{ indicator.time }}</td>
-            <td>{{ indicator.fuzeren }}</td>
-            <td>{{ indicator.content }}</td>
-            <td>{{ indicator.cite }}</td>
-            <td>
-              <span class="status" :class="statusClassMap[indicator.status]">{{ indicator.status }}</span>
-            </td>
-            <td>
-              <button type="button" @click="handleView(indicator)">查看</button>
-              <button type="button">编辑</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- 搜索栏 -->
+    <div class="page-content">
+      <el-form :model="form" label-width="auto" class="search-form">
+        <el-row justify="start" align="middle" class="search-row">
+          <el-col class="search-col">
+            <el-form-item label="" class="form-item-no-margin">
+              <el-input v-model="form.name" class="input-name" placeholder="搜索指标" />
+            </el-form-item>
+          </el-col>
+          <el-col class="search-col">
+            <el-form-item label="指标体系" class="form-item-no-margin">
+              <el-select v-model="form.region" placeholder="" class="select-zone">
+                <el-option label="指标体系1" value="id1" />
+                <el-option label="指标体系2" value="id2" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col class="search-col-btn">
+            <el-form-item label="&nbsp;" class="form-item-no-margin">
+              <div class="button-group">
+                <el-button type="primary" @click="onSubmit">新建指标体系</el-button>
+                <el-button>删除指标体系</el-button>
+              </div>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
     </div>
 
-    <IndicatorDetailModal ref="modalRef" />
-  </section>
+    <!-- 主体区域 -->
+    <section class="page-body">
+      <div class="page-left">
+        <div class="page-header">
+          <div>
+            <h3>指标体系</h3>
+          </div>
+          <div class="header-actions"></div>
+        </div>
+        <div class="tree-slot">
+          <el-tree-v2 :data="data" :props="props" :height="200" class="tree-v2" />
+        </div>
+      </div>
+
+      <div class="page-right">
+        <div class="page-header">
+          <div>
+            <el-form ref="formRef" :model="form" :rules="rules" label-width="110px">
+              <div class="editor-grid">
+                <el-form-item label="名称" prop="name">
+                  <el-input v-model="form.name" maxlength="64" />
+                </el-form-item>
+                <el-form-item label="编码" prop="code">
+                  <el-input v-model="form.code" maxlength="64" />
+                </el-form-item>
+                <el-form-item label="所属层级" prop="level">
+                  <el-select v-model="form.level">
+                    <el-option v-for="option in levelOptions" :key="option.value" :label="option.label"
+                      :value="option.value" />
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="指标属性" prop="property">
+                  <el-select v-model="form.property">
+                    <el-option v-for="option in propertyOptions" :key="option.value" :label="option.label"
+                      :value="option.value" />
+                  </el-select>
+                </el-form-item>
+                <el-form-item class="span-all" label="描述" prop="description">
+                  <el-input v-model="form.description" :rows="3" type="textarea" />
+                </el-form-item>
+                <el-form-item class="span-all" label="计算规则" prop="calculationRule">
+                  <el-input v-model="form.calculationRule" :rows="3" type="textarea" />
+                </el-form-item>
+                <el-form-item class="span-all" label="观测要求" prop="observationRequirement">
+                  <el-input v-model="form.observationRequirement" :rows="3" type="textarea" />
+                </el-form-item>
+                <el-form-item class="span-all" label="关联资源" prop="relatedResourceIds">
+                  <el-select v-model="form.relatedResourceIds" multiple filterable placeholder="选择关联资源">
+                    <el-option v-for="resource in resources" :key="resource.id"
+                      :label="`${resource.name} (${resource.code})`" :value="resource.id" />
+                  </el-select>
+                </el-form-item>
+                <el-button type="primary" @click="onSubmit">保存</el-button>
+                <el-button @click="clear">清空</el-button>
+              </div>
+            </el-form>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  </div>
 </template>
 
+<script setup lang="ts">
+
+import { reactive } from 'vue'
+
+const form = reactive({
+  name: '',
+  region: '',
+})
+
+const onSubmit = () => {
+  console.log('submit!')
+}
+const clear = () => {
+  console.log('clear!')
+}
+interface Tree {
+  id: string
+  label: string
+  children?: Tree[]
+}
+
+const getKey = (prefix: string, id: number) => {
+  return `${prefix}-${id}`
+}
+
+const createData = (
+  maxDeep: number,
+  maxChildren: number,
+  minNodesNumber: number,
+  deep = 1,
+  key = 'node'
+): Tree[] => {
+  let id = 0
+  return Array.from({ length: minNodesNumber })
+    .fill(deep)
+    .map(() => {
+      const childrenNumber =
+        deep === maxDeep ? 0 : Math.round(Math.random() * maxChildren)
+      const nodeKey = getKey(key, ++id)
+      return {
+        id: nodeKey,
+        label: nodeKey,
+        children: childrenNumber
+          ? createData(maxDeep, maxChildren, childrenNumber, deep + 1, nodeKey)
+          : undefined,
+      }
+    })
+}
+
+const props = {
+  value: 'id',
+  label: 'label',
+  children: 'children',
+}
+
+const data = createData(4, 30, 40)
+</script>
+
 <style scoped>
-.indicator-management {
-  display: flex;
-  height: 100%;
-  flex-direction: column;
-  padding: 16px;
-}
-
-.indicator-management__title {
-  margin: 0 0 16px;
-  color: #1e3a5f;
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.indicator-management__table-wrap {
-  overflow: auto;
-}
-
-.indicator-management__table {
+/* ==================== 树组件 ==================== */
+.tree-v2 {
   width: 100%;
-  border-collapse: collapse;
+}
+
+/* ==================== 页面容器 ==================== */
+.page-wrap {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ==================== 顶部标题 ==================== */
+.toolbar-slot {
+  height: 48px;
+  display: flex;
+  font-size: 24px;
+  font-weight: bold;
+  text-indent: 20px;
+  margin-top: 20px;
+}
+
+/* ==================== 搜索栏 ==================== */
+.page-content {
+  padding: 0 20px;
+}
+
+.search-form {
+  width: 100%;
+}
+
+.search-row {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.search-col {
+  flex: 0 0 auto;
+  padding-left: 0 !important;
+  padding-right: 8px !important;
+}
+
+.search-col-btn {
+  flex: 0 0 auto;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.form-item-no-margin {
+  margin-bottom: 0;
+}
+
+.input-name {
+  width: 120px;
+}
+
+.select-zone {
+  width: 120px;
+}
+
+/* ==================== 按钮组 ==================== */
+.button-group {
+  display: flex;
+  gap: 8px;
+}
+
+/* ==================== 主体区域 ==================== */
+.page-body {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  grid-template-columns: minmax(340px, 440px) 1fr;
+  gap: 12px;
+}
+
+.page-left,
+.page-right {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
   background: #ffffff;
+  border: 1px solid var(--el-border-color);
+  border-radius: 8px;
 }
 
-.indicator-management__table th,
-.indicator-management__table td {
-  padding: 12px 14px;
-  border-bottom: 1px solid #e5e7eb;
-  text-align: left;
-  white-space: nowrap;
+.page-right {
+  padding: 18px;
 }
 
-.indicator-management__table th {
-  color: #334155;
-  font-size: 14px;
-  font-weight: 600;
-  background: #f8fbff;
-}
-
-.indicator-management__table td {
-  color: #475569;
-  font-size: 14px;
-}
-
-.status {
-  display: inline-flex;
+/* ==================== 卡片头部 ==================== */
+.page-header {
+  display: flex;
   align-items: center;
-  padding: 2px 8px;
-  border-radius: 999px;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--el-border-color);
+  flex-shrink: 0;
+}
+
+.page-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--el-text-color-primary);
+}
+
+.page-header p {
+  margin: 6px 0 0;
   font-size: 12px;
+  color: var(--el-text-color-secondary);
 }
 
-.status--running {
-  background: #eaf2ff;
-  color: #2563eb;
+.header-actions {
+  display: flex;
+  gap: 8px;
 }
 
-.status--pending {
-  background: #fff7e6;
-  color: #b45309;
+/* ==================== 内容区域 ==================== */
+.tree-slot,
+.editor-slot {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px 16px;
 }
-
-.status--done {
-  background: #ecfdf3;
-  color: #047857;
-}
-
-.indicator-management__table button {
-  margin-right: 8px;
-  border: 0;
-  background: transparent;
-  color: #1677ff;
-  cursor: pointer;
-}
-</style> 
+</style>
