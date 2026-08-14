@@ -180,7 +180,7 @@ const filteredTasks = computed(() => {
 const displayedTasks = computed(() => {
   const list = [...filteredTasks.value]
   
-  // 自定义排序（支持多字段排序）
+  // 排序
   if (sort.value.prop && sort.value.order) {
     const prop = sort.value.prop
     list.sort((a, b) => {
@@ -239,9 +239,6 @@ function resetPage() {
   currentPage.value = 1
 }
 
-// ============================================================
-// 7. 操作方法 - 任务CRUD
-// ============================================================
 
 /** 刷新任务列表（模拟异步请求） */
 function refresh() {
