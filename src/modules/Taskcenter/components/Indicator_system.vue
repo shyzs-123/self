@@ -1,8 +1,7 @@
 <template>
   <div class="page-wrap">
     <!-- 顶部标题 -->
-    <div class="toolbar-slot">指标体系管理</div>
-
+    
     <!-- 搜索栏 -->
     <div class="page-content">
       <el-form :model="form" label-width="auto" class="search-form">
@@ -182,6 +181,7 @@ const data = createData(4, 30, 40)
 
 /* ==================== 搜索栏 ==================== */
 .page-content {
+  margin-top: 16px;
   padding: 0 20px;
 }
 

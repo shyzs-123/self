@@ -347,7 +347,7 @@ function statusType(status: Status) {
     <!-- 工具栏区域：标题 + 搜索 + 筛选 + 操作按钮 -->
     <!-- ============================================ -->
     <div class="task-management__toolbar">
-      <h1>{{ text.title }}</h1>
+    
 
       <div class="task-management__filters">
         <!-- 关键词搜索框 -->

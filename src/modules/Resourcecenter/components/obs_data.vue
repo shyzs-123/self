@@ -1,3 +1,9 @@
+<script lang="ts">
+
+</script>
+
+
+
 <template>
   <section class="center-pane">
     <h2>观测数据仓</h2>

@@ -167,7 +167,7 @@ const handleSaveVersion = (version: Version) => {
   <section class="indicator-management">
     <!-- 标题和操作栏 -->
     <div class="indicator-management__header">
-      <h1 class="indicator-management__title">版本管理</h1>
+     
       <el-button type="primary" @click="handleCreateVersion">新建版本</el-button>
     </div>
 

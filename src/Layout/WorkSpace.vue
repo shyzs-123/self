@@ -13,7 +13,7 @@
     />
 
     <header class="workspace-header">
-      <strong>{{ panelTitle }}</strong>
+        <strong>{{ panelTitle }}</strong>
       <div class="workspace-actions">
         <!-- 刷新按钮：⟳ -->
         <button type="button" title="Refresh" @click="windowStore.refresh">⟳</button>
@@ -50,10 +50,10 @@ const panelComponents = {
   business: BusinessPanel
 }
 const panelTitles = {
-  task: 'Task Center',
-  resource: 'Resource Center',
-  application: 'Application Center',
-  business: 'Business Center'
+  task: '任务中心',
+  resource: '资源中心',
+  application: '应用中心',
+  business: '业务中心'
 }
 const activePanelComponent = computed(() => panelComponents[windowStore.currentPanel] ?? TaskPanel)
 const panelTitle = computed(() => panelTitles[windowStore.currentPanel] ?? panelTitles.task)
