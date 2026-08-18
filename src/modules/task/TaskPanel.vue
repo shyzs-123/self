@@ -1,8 +1,8 @@
 <script setup>
 import { computed, ref } from 'vue'
-import Taskmanagement from './components/Taskmanagement.vue'
-import IndicatorSystem from './components/Indicator_system.vue'
-import VersionManagement from './components/version_management.vue'
+import Taskmanagement from './views/Taskmanagement.vue'
+import IndicatorSystem from './views/Indicator_system.vue'
+import VersionManagement from './views/version_management.vue'
 
 const taskTabs = [
   { id: 'task', label: '任务管理', component: Taskmanagement },

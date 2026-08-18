@@ -119,7 +119,7 @@ function statusTagType(status: Status): string {
   return map[status] || 'info'
 }
 
-// ==================== 基础信息表格数据（每行两个字段） ====================
+// ==================== 基础信息表格数据====================
 
 const basicRows = computed(() => {
   if (!props.resource) return []
@@ -150,7 +150,7 @@ const capabilityList = computed(() => {
   return props.resource.capabilityList || []
 })
 
-// 能力字段配置（用于循环渲染）
+// 能力字段配置
 const capabilityFields = [
   { key: 'observableTarget', label: '可观测对象' },
   { key: 'observationElements', label: '观测要素' },

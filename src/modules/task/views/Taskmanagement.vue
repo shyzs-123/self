@@ -4,8 +4,8 @@
 // ============================================================
 import { computed, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import TaskFormDialog from '@/modules/Taskcenter/Hooks/TaskFormDialog.vue'
-import TaskDetailDrawer from '@/modules/Taskcenter/Hooks/TaskDetailDrawer.vue'
+import TaskFormDialog from '@/modules/task/components/TaskFormDialog.vue'
+import TaskDetailDrawer from '@/modules/task/components/TaskDetailDrawer.vue'
 
 // ============================================================
 // 2. 类型定义 - 定义任务相关的数据结构

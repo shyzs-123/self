@@ -15,7 +15,7 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import * as Cesium from 'cesium'
 import 'cesium/Build/Cesium/Widgets/widgets.css'
 
-import Measure from '@/store/measure.js'
+import Measure from '@/map/measure/measure.js'
 
 const containerRef = ref(null)
 let viewer = null

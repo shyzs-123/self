@@ -1,86 +1,8 @@
-<template>
-  <section class="resource-management">
-    <!-- 工具栏 -->
-    <div class="resource-management__toolbar">
-      <div class="resource-management__filters">
-        <el-input v-model="keyword" clearable :placeholder="text.search" @input="resetPage" />
-
-        <el-select v-model="typeFilter" clearable :placeholder="text.type" @change="resetPage">
-          <el-option v-for="type in typeOptions" :key="type" :label="labels.type[type]" :value="type" />
-        </el-select>
-
-        <el-select v-model="statusFilter" clearable :placeholder="text.status" @change="resetPage">
-          <el-option v-for="status in statusOptions" :key="status" :label="labels.status[status]" :value="status" />
-        </el-select>
-
-        <el-select v-model="organizationFilter" clearable :placeholder="text.organization" @change="resetPage">
-          <el-option v-for="org in organizationOptions" :key="org" :label="org" :value="org" />
-        </el-select>
-
-        <el-button :loading="loading" @click="refresh">{{ text.refresh }}</el-button>
-        <el-button type="primary" @click="openCreate">{{ text.create }}</el-button>
-      </div>
-    </div>
-
-    <!-- 资源列表 -->
-    <el-table
-      v-loading="loading"
-      :data="displayedResources"
-      class="resource-management__table"
-      height="100%"
-      @sort-change="handleSort"
-    >
-      <el-table-column prop="name" :label="text.name" min-width="150" sortable="custom" />
-      <el-table-column prop="code" :label="text.code" min-width="140" sortable="custom" />
-      <el-table-column prop="type" :label="text.typeColumn" width="110" sortable="custom">
-        <template #default="{ row }">
-          <el-tag :type="typeTagType(row.type)">{{ typeLabel(row.type) }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="location" :label="text.location" min-width="140" sortable="custom" />
-      <el-table-column prop="organization" :label="text.organizationColumn" min-width="130" sortable="custom" />
-      <el-table-column prop="status" :label="text.statusColumn" width="105" sortable="custom">
-        <template #default="{ row }">
-          <el-tag :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="createdAt" :label="text.createdAt" min-width="150" sortable="custom" />
-      <el-table-column :label="text.actions" width="200" fixed="right">
-        <template #default="{ row }">
-          <div class="resource-management__actions">
-            <el-button link type="primary" @click="openDetail(row)">{{ text.view }}</el-button>
-            <el-button link type="primary" @click="openEdit(row)">{{ text.edit }}</el-button>
-            <el-button link type="danger" @click="removeResource(row)">{{ text.remove }}</el-button>
-          </div>
-        </template>
-      </el-table-column>
-      <template #empty>
-        <el-empty :description="text.empty" />
-      </template>
-    </el-table>
-
-    <!-- 分页 -->
-    <div class="resource-management__pagination">
-      <el-pagination
-        v-model:current-page="currentPage"
-        v-model:page-size="pageSize"
-        :total="filteredResources.length"
-        :page-sizes="[5, 8, 12]"
-        layout="total, sizes, prev, pager, next"
-      />
-    </div>
-
-    <!-- 弹窗和抽屉 -->
-    <ResourceFormDialog v-model="formVisible" :mode="formMode" :resource="editingResource" @save="saveResource" />
-    <ResourceDetailDrawer v-model="drawerVisible" :resource="selectedResource" />
-  </section>
-</template>
-
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import ResourceFormDialog from '@/modules/Resourcecenter/Hooks/ResourceFormDialog.vue'
-import ResourceDetailDrawer from '@/modules/Resourcecenter/Hooks/ResourceDetailDrawer.vue'
+import ResourceFormDialog from '@/modules/resource/components/ResourceFormDialog.vue'
+import ResourceDetailDrawer from '@/modules/resource/components/ResourceDetailDrawer.vue'
 
 // ==================== 类型定义 ====================
 
@@ -121,11 +43,11 @@ type Resource = {
   capabilities: string
   remark: string
 
-  // ===== 扩展能力信息（全部可选） =====
+  // ===== 扩展能力信息 =====
   interfaceAddress?: string
   updatedAt?: string
 
-  // ===== 能力列表（动态多能力） =====
+  // ===== 能力列表 =====
   capabilityList?: CapabilityItem[]
 }
 
@@ -184,10 +106,13 @@ const resources = ref<Resource[]>([
 ])
 
 const loading = ref(false)
+//搜索能力
 const keyword = ref('')
 const typeFilter = ref<Type | ''>('')
 const statusFilter = ref<Status | ''>('')
 const organizationFilter = ref('')
+
+
 const currentPage = ref(1)
 const pageSize = ref(8)
 const sort = ref<{ prop: keyof Resource | ''; order: 'ascending' | 'descending' | null }>({
@@ -201,7 +126,7 @@ const editingResource = ref<Resource | null>(null)
 const drawerVisible = ref(false)
 const selectedResource = ref<Resource | null>(null)
 
-// ==================== 计算属性 ====================
+//计算属性 
 
 const typeOptions = Object.keys(labels.type) as Type[]
 const statusOptions = Object.keys(labels.status) as Status[]
@@ -209,7 +134,7 @@ const statusOptions = Object.keys(labels.status) as Status[]
 const organizationOptions = computed(() =>
   [...new Set(resources.value.map((r) => r.organization))]
 )
-
+//筛选
 const filteredResources = computed(() =>
   resources.value.filter((resource) => {
     const query = keyword.value.trim().toLowerCase()
@@ -221,7 +146,7 @@ const filteredResources = computed(() =>
       (!organizationFilter.value || resource.organization === organizationFilter.value)
   })
 )
-
+//显示筛选结果
 const displayedResources = computed(() => {
   const list = [...filteredResources.value]
   if (sort.value.prop && sort.value.order) {
@@ -355,6 +280,86 @@ function statusType(status: Status) {
   return status === 'online' ? 'success' : status === 'offline' ? 'danger' : status === 'maintenance' ? 'warning' : 'info'
 }
 </script>
+
+
+<template>
+  <section class="resource-management">
+    <!-- 工具栏 -->
+    <div class="resource-management__toolbar">
+      <div class="resource-management__filters">
+        <el-input v-model="keyword" clearable :placeholder="text.search" @input="resetPage" />
+
+        <el-select v-model="typeFilter" clearable :placeholder="text.type" @change="resetPage">
+          <el-option v-for="type in typeOptions" :key="type" :label="labels.type[type]" :value="type" />
+        </el-select>
+
+        <el-select v-model="statusFilter" clearable :placeholder="text.status" @change="resetPage">
+          <el-option v-for="status in statusOptions" :key="status" :label="labels.status[status]" :value="status" />
+        </el-select>
+
+        <el-select v-model="organizationFilter" clearable :placeholder="text.organization" @change="resetPage">
+          <el-option v-for="org in organizationOptions" :key="org" :label="org" :value="org" />
+        </el-select>
+
+        <el-button :loading="loading" @click="refresh">{{ text.refresh }}</el-button>
+        <el-button type="primary" @click="openCreate">{{ text.create }}</el-button>
+      </div>
+    </div>
+
+    <!-- 资源列表 -->
+    <el-table
+      v-loading="loading"
+      :data="displayedResources"
+      class="resource-management__table"
+      height="100%"
+      @sort-change="handleSort"
+    >
+      <el-table-column prop="name" :label="text.name" min-width="150" sortable="custom" />
+      <el-table-column prop="code" :label="text.code" min-width="140" sortable="custom" />
+      <el-table-column prop="type" :label="text.typeColumn" width="110" sortable="custom">
+        <template #default="{ row }">
+          <el-tag :type="typeTagType(row.type)">{{ typeLabel(row.type) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="location" :label="text.location" min-width="140" sortable="custom" />
+      <el-table-column prop="organization" :label="text.organizationColumn" min-width="130" sortable="custom" />
+      <el-table-column prop="status" :label="text.statusColumn" width="105" sortable="custom">
+        <template #default="{ row }">
+          <el-tag :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="createdAt" :label="text.createdAt" min-width="150" sortable="custom" />
+      <el-table-column :label="text.actions" width="200" fixed="right">
+        <template #default="{ row }">
+          <div class="resource-management__actions">
+            <el-button link type="primary" @click="openDetail(row)">{{ text.view }}</el-button>
+            <el-button link type="primary" @click="openEdit(row)">{{ text.edit }}</el-button>
+            <el-button link type="danger" @click="removeResource(row)">{{ text.remove }}</el-button>
+          </div>
+        </template>
+      </el-table-column>
+      <template #empty>
+        <el-empty :description="text.empty" />
+      </template>
+    </el-table>
+
+    <!-- 分页 -->
+    <div class="resource-management__pagination">
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :total="filteredResources.length"
+        :page-sizes="[5, 8, 12]"
+        layout="total, sizes, prev, pager, next"
+      />
+    </div>
+
+    <!-- 弹窗和抽屉 -->
+    <ResourceFormDialog v-model="formVisible" :mode="formMode" :resource="editingResource" @save="saveResource" />
+    <ResourceDetailDrawer v-model="drawerVisible" :resource="selectedResource" />
+  </section>
+</template>
+
 
 <style scoped>
 .resource-management {

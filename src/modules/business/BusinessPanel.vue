@@ -1,9 +1,9 @@
 <script setup>
 import { computed, ref } from 'vue'
-import TaskProcessing from './components/task_processing.vue'
-import ResourceMatch from './components/resource_match.vue'
-import ResourceConfig from './components/resource_config.vue'
-import Scheme from './components/scheme.vue'
+import TaskProcessing from './views/task_processing.vue'
+import ResourceMatch from './views/resource_match.vue'
+import ResourceConfig from './views/resource_config.vue'
+import Scheme from './views/scheme.vue'
 
 const businessTabs = [
   { id: 'task-processing', label: '任务处理', component: TaskProcessing },

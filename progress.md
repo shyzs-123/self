@@ -164,3 +164,47 @@
 - `src/modules/Taskcenter/components/Taskmanagement.vue`: retained the redesigned task page without the obsolete forced-remount dependency.
 - `progress.md`: recorded the fix and validation result.
 - Rollback: restore the previous `WorkSpace.vue` and `Taskmanagement.vue` files, then remove this log entry.
+
+## 2026-08-18 - Task: Reorganize Vue source paths by application responsibility
+### What was done
+- Reorganized layout files under `src/layouts/`, map files under `src/map/`, shared state under `src/stores/`, and HTTP utilities under `src/services/`.
+- Renamed the four business module directories to lowercase and separated their page content into `views/`.
+- Moved task and resource dialogs/drawers from `Hooks/` into module-owned `components/` directories.
+- Updated only import paths required by the moves; component templates, functions, data structures, and interaction logic were not intentionally changed.
+
+### Testing
+- Old path/reference scan returned no remaining references to the former layout, module, store, utility, or `Hooks` paths.
+- `npm run build` still fails on pre-existing TypeScript issues in the indicator system page, algorithm detail drawer, and version form dialog; no new migration-specific error was observed.
+
+### Notes
+- `src/layouts/`, `src/map/`, `src/modules/`, `src/services/`, `src/stores/`: reorganized existing files without changing their business content.
+- `src/App.vue` and moved Vue files: updated import paths only.
+- `docs/project-structure.md`: documented the new source layout.
+- Rollback: move each directory back to its previous path (`layouts -> Layout`, `map -> Layout/store`, `stores -> store`, `services -> utils`, and the module directories back to their original names), then restore the previous import paths and remove this log entry.
+
+## 2026-08-18 - Task: Create Vue 3 architecture diagrams
+### What was done
+- Added a component organization diagram showing the application entry, layout shell, map capability, workspace state, dynamic center panels, module views, and dialog/drawer relationships.
+- Added a technical architecture layering diagram covering bootstrap, presentation, state, capability, and current data layers.
+
+### Testing
+- Reviewed Mermaid node names and relationships against the current imports and dynamic component usage in `App.vue`, `Workspace.vue`, the four panel components, and task/resource module views.
+- No application code was changed.
+
+### Notes
+- `docs/vue3-project-architecture.md`: added the two Mermaid diagrams and current architecture boundary notes.
+- `progress.md`: recorded the architecture documentation deliverable.
+- Rollback: delete `docs/vue3-project-architecture.md` and remove this log entry.
+
+## 2026-08-18 - Task: Improve Mermaid preview contrast
+### What was done
+- Added explicit light Mermaid theme variables to both architecture diagrams so they remain readable in VS Code dark mode.
+
+### Testing
+- Confirmed both Mermaid blocks contain the explicit `base` theme initialization.
+- No application code was changed.
+
+### Notes
+- `docs/vue3-project-architecture.md`: added light background, text, border, and line colors to both diagrams.
+- `progress.md`: recorded the preview contrast adjustment.
+- Rollback: remove the two `%%{init: ...}%%` lines and this log entry.

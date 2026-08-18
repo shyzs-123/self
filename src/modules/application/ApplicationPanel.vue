@@ -1,8 +1,8 @@
 <script setup>
 import { computed, ref } from 'vue'
-import Situation from './components/situation.vue'
-import Progress from './components/progess.vue'
-import Analysis from './components/analysis.vue'
+import Situation from './views/situation.vue'
+import Progress from './views/progess.vue'
+import Analysis from './views/analysis.vue'
 
 const applicationTabs = [
   { id: 'situation', label: '态势展示', component: Situation },

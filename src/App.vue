@@ -1,9 +1,9 @@
 <script setup>
-import Header from  '@/Layout/Header.vue'
-import Sidebar from '@/Layout/Sidebar.vue'
-import Mapcontainer from '@/Layout/Mapcontainer.vue'
-import { useWindowStore } from '@/store/windowStore.js'
-import Workspace from '@/Layout/Workspace.vue'
+import Header from  '@/layouts/Header.vue'
+import Sidebar from '@/layouts/Sidebar.vue'
+import Mapcontainer from '@/map/MapContainer.vue'
+import { useWindowStore } from '@/stores/workspace.js'
+import Workspace from '@/layouts/Workspace.vue'
 
 const windowStore = useWindowStore()
 </script>

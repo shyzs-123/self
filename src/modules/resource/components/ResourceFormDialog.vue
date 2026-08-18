@@ -194,7 +194,7 @@ watch(() => props.modelValue, (opened) => {
     // 复制基础信息
     const { capabilityList, ...baseInfo } = props.resource
     Object.assign(form, baseInfo)
-    // 复制能力列表，重新生成 id
+    // 复制能力列表
     if (props.resource.capabilityList && props.resource.capabilityList.length > 0) {
       form.capabilityList = props.resource.capabilityList.map((item) => ({
         ...item,

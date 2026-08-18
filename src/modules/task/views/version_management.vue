@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import VersionDrawer from '@/modules/Taskcenter/Hooks/VersionDrawer.vue'
-import VersionFormDialog from '@/modules/Taskcenter/Hooks/VersionFormDialog.vue'
+import VersionDrawer from '@/modules/task/components/VersionDrawer.vue'
+import VersionFormDialog from '@/modules/task/components/VersionFormDialog.vue'
 
 // ==================== 类型定义 ====================
 

@@ -1,5 +1,5 @@
 <script setup>
-import { useWindowStore } from '@/store/windowStore.js'
+import { useWindowStore } from '@/stores/workspace.js'
 
 const windowStore = useWindowStore()
 

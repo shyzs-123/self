@@ -36,11 +36,11 @@
 
 <script setup>
 import { computed, onBeforeUnmount, ref, onMounted } from 'vue'
-import { useWindowStore } from '@/store/windowStore.js'
-import TaskPanel from '@/modules/Taskcenter/TaskPanel.vue'
-import ResourcePanel from '@/modules/Resourcecenter/ResourcePanel.vue'
-import ApplicationPanel from '@/modules/Applicationcenter/ApplicationPanel.vue'
-import BusinessPanel from '@/modules/Businesscenter/BusinessPanel.vue'
+import { useWindowStore } from '@/stores/workspace.js'
+import TaskPanel from '@/modules/task/TaskPanel.vue'
+import ResourcePanel from '@/modules/resource/ResourcePanel.vue'
+import ApplicationPanel from '@/modules/application/ApplicationPanel.vue'
+import BusinessPanel from '@/modules/business/BusinessPanel.vue'
 
 const windowStore = useWindowStore()
 const panelComponents = {

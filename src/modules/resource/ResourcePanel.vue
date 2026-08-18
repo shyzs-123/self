@@ -1,13 +1,13 @@
 <script setup>
 import { computed, ref } from 'vue'
-import ObsAbility from './components/obs_ability.vue'
-import ObsData from './components/obs_data.vue'
-import Algorithm from './components/algorithm.vue'
-import Knowledge from './components/knowledge.vue'
+import ObsAbility from './views/obs_ability.vue'
+import ObsData from './views/obs_data.vue'
+import Algorithm from './views/algorithm.vue'
+import Knowledge from './views/knowledge.vue'
 
 const resourceTabs = [
   { id: 'obs-ability', label: '观测能力库', component: ObsAbility },
-  { id: 'obs-data', label: '观测数据仓', component: ObsData },
+  { id: 'obs-data', label: '观测数据库', component: ObsData },
   { id: 'algorithm', label: '算法模型库', component: Algorithm },
   { id: 'knowledge', label: '知识库', component: Knowledge },
 ]
