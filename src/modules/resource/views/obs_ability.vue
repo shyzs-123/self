@@ -4,52 +4,18 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import ResourceFormDialog from '@/modules/resource/components/ResourceFormDialog.vue'
 import ResourceDetailDrawer from '@/modules/resource/components/ResourceDetailDrawer.vue'
 
-// ==================== 类型定义 ====================
-
-type Type = 'satellite' | 'platform' | 'sensor' | 'ground'
-type Status = 'online' | 'offline' | 'maintenance' | 'disabled'
-
-// 单个能力项
-type CapabilityItem = {
-  id: number
-  observableTarget: string
-  observationElements: string
-  observationPrecision: string
-  spatialResolution: string
-  temporalResolution: string
-  coverageRange: string
-  monitoringFrequency: string
-  workHours: string
-  environmentalLimits: string
-  availableTime: string
-}
-
-/**
- * 资源完整信息
- */
-type Resource = {
-  // ===== 基础信息 =====
-  id: string
-  name: string
-  code: string
-  type: Type
-  location: string
-  organization: string
-  status: Status
-  createdAt: string
-
-  // ===== 通用 =====
-  description: string
-  capabilities: string
-  remark: string
-
-  // ===== 扩展能力信息 =====
-  interfaceAddress?: string
-  updatedAt?: string
-
-  // ===== 能力列表 =====
-  capabilityList?: CapabilityItem[]
-}
+// ==================== 新类型导入 ====================
+import type { PlatformType, PlatformStatus, PlatformListItem, PlatformMetadata } from '@/modules/resource/sensor/types/platform'
+import {
+  getPlatformLabel,
+  getStatusLabel,
+  getPlatformTagType,
+  getStatusTagType,
+  platformOptions,
+  statusOptions,
+  listMetrics,
+} from '@/modules/resource/sensor/config/platformConfig.ts'
+import { createDefaultCapability } from '@/modules/resource/sensor/types/platform'
 
 // ==================== 文案配置 ====================
 
@@ -78,81 +44,184 @@ const text = {
   location: '位置',
   organizationColumn: '所属单位',
   statusColumn: '状态',
-  createdAt: '创建时间',
-  actions: '操作'
-}
-
-const labels = {
-  type: {
-    satellite: '卫星',
-    platform: '平台',
-    sensor: '传感器',
-    ground: '地面站'
-  },
-  status: {
-    online: '在线',
-    offline: '离线',
-    maintenance: '维护中',
-    disabled: '停用'
-  }
+  createdAt: '部署时间',
+  actions: '操作',
+  primaryMetric: '主要指标',
+  secondaryMetric: '次要指标',
 }
 
 // ==================== 响应式数据 ====================
 
-const resources = ref<Resource[]>([
+// 使用新类型存储数据（同时保留旧字段兼容）
+const resources = ref<PlatformMetadata[]>([
   makeResource('R-001', '高分一号卫星', 'GF-1', 'satellite', '太阳同步轨道', '中国空间技术研究院', 'online'),
-  makeResource('R-002', '地面接收站', 'GRS-01', 'ground', '北京', '国家卫星气象中心', 'online'),
-  makeResource('R-003', '光学传感器', 'OPT-01', 'sensor', '卫星平台', '中科院光电所', 'maintenance')
+  makeResource('R-002', '地面接收站', 'GRS-01', 'groundStation', '北京', '国家卫星气象中心', 'online'),
+  makeResource('R-003', '光学传感器', 'OPT-01', 'satellite', '卫星平台', '中科院光电所', 'maintenance'),
 ])
 
 const loading = ref(false)
-//搜索能力
 const keyword = ref('')
-const typeFilter = ref<Type | ''>('')
-const statusFilter = ref<Status | ''>('')
+const typeFilter = ref<PlatformType | ''>('')
+const statusFilter = ref<PlatformStatus | ''>('')
 const organizationFilter = ref('')
-
 
 const currentPage = ref(1)
 const pageSize = ref(8)
-const sort = ref<{ prop: keyof Resource | ''; order: 'ascending' | 'descending' | null }>({
+const sort = ref<{ prop: keyof PlatformListItem | ''; order: 'ascending' | 'descending' | null }>({
   prop: '',
-  order: null
+  order: null,
 })
 
 const formVisible = ref(false)
 const formMode = ref<'create' | 'edit'>('create')
-const editingResource = ref<Resource | null>(null)
+const editingResource = ref<PlatformMetadata | null>(null)
 const drawerVisible = ref(false)
-const selectedResource = ref<Resource | null>(null)
+const selectedResource = ref<PlatformMetadata | null>(null)
 
-//计算属性 
+// ============================================================
+// 辅助函数：创建示例资源（兼容新旧格式）
+// ============================================================
 
-const typeOptions = Object.keys(labels.type) as Type[]
-const statusOptions = Object.keys(labels.status) as Status[]
+function makeResource(
+  id: string,
+  name: string,
+  code: string,
+  type: PlatformType,
+  location: string,
+  organization: string,
+  status: PlatformStatus
+): PlatformMetadata {
+  const now = '2026-08-18'
+  const capability = createDefaultCapability(type)
+
+  // 针对不同预设部分数据
+  if (type === 'satellite') {
+    ;(capability.data as any).spatialResolution = '16m'
+    ;(capability.data as any).revisitTime = '2天'
+    ;(capability.data as any).swath = '800km'
+    ;(capability.data as any).orbitHeight = '645km'
+  }
+
+  const metadata: PlatformMetadata = {
+    general: {
+      platformId: id,
+      platformName: name,
+      platformCode: code,
+      platformType: type,
+      manufacturer: '示例厂商',
+      model: 'Model-X',
+      status,
+      deploymentDate: now,
+      location,
+      organization,
+      owner: '责任人',
+    },
+    constraint: {
+      effectiveTimeStart: '2024-01-01',
+      effectiveTimeEnd: '2026-12-31',
+      constraintLevel: 'public',
+    },
+    contact: {
+      organizationName: organization,
+      individualName: '张工',
+      positionName: '主任',
+      phone: '010-12345678',
+      email: 'contact@example.com',
+      address: '北京市海淀区',
+    },
+    geoPosition: {
+      longitude: 116.5,
+      latitude: 39.9,
+      altitude: 645,
+      spatialReference: 'WGS84',
+    },
+    interface: {
+      serviceAddress: 'https://api.example.com',
+      protocolType: 'RESTful',
+    },
+    property: capability,
+    // 兼容旧字段
+    name,
+    code,
+    type,
+    location,
+    organization,
+    status,
+    interfaceAddress: 'https://api.example.com',
+    description: '观测资源描述信息',
+    remark: '正常运行中',
+    createdAt: now,
+    capabilityList: [],
+  }
+  return metadata
+}
+
+// ============================================================
+// 列表展示转换
+// ============================================================
+
+const listItems = computed<PlatformListItem[]>(() => {
+  return resources.value.map((r) => {
+    const metric = listMetrics[r.general.platformType] || listMetrics.satellite
+    return {
+      platformId: r.general.platformId,
+      platformName: r.general.platformName,
+      platformCode: r.general.platformCode,
+      platformType: r.general.platformType,
+      status: r.general.status,
+      location: r.general.location,
+      organization: r.general.organization,
+      owner: r.general.owner,
+      primaryMetric: {
+        label: metric.primary.label,
+        value: metric.primary.getValue(r),
+      },
+      secondaryMetric: {
+        label: metric.secondary.label,
+        value: metric.secondary.getValue(r),
+      },
+      deploymentDate: r.general.deploymentDate,
+      constraintLevel: r.constraint.constraintLevel,
+    }
+  })
+})
+
+// ============================================================
+// 筛选与分页
+// ============================================================
+
+const typeOptions = platformOptions
+const statusOpts = statusOptions
 
 const organizationOptions = computed(() =>
-  [...new Set(resources.value.map((r) => r.organization))]
+  [...new Set(resources.value.map((r) => r.general.organization))]
 )
-//筛选
+
 const filteredResources = computed(() =>
-  resources.value.filter((resource) => {
+  listItems.value.filter((resource) => {
     const query = keyword.value.trim().toLowerCase()
-    const matchedQuery = !query ||
-      [resource.name, resource.code, resource.location].some((v) => v.toLowerCase().includes(query))
-    return matchedQuery &&
-      (!typeFilter.value || resource.type === typeFilter.value) &&
+    const matchedQuery =
+      !query ||
+      [resource.platformName, resource.platformCode, resource.location].some((v) =>
+        v.toLowerCase().includes(query)
+      )
+    return (
+      matchedQuery &&
+      (!typeFilter.value || resource.platformType === typeFilter.value) &&
       (!statusFilter.value || resource.status === statusFilter.value) &&
       (!organizationFilter.value || resource.organization === organizationFilter.value)
+    )
   })
 )
-//显示筛选结果
+
 const displayedResources = computed(() => {
   const list = [...filteredResources.value]
   if (sort.value.prop && sort.value.order) {
     const prop = sort.value.prop
     list.sort((a, b) => {
-      const result = String(a[prop]).localeCompare(String(b[prop]))
+      const aVal = String((a as any)[prop] ?? '')
+      const bVal = String((b as any)[prop] ?? '')
+      const result = aVal.localeCompare(bVal)
       return sort.value.order === 'ascending' ? result : -result
     })
   }
@@ -160,64 +229,13 @@ const displayedResources = computed(() => {
   return list.slice(start, start + pageSize.value)
 })
 
-// ==================== 方法 ====================
+// ============================================================
+// 方法
+// ============================================================
 
-function makeResource(
-  id: string,
-  name: string,
-  code: string,
-  type: Type,
-  location: string,
-  organization: string,
-  status: Status
-): Resource {
-  return {
-    id,
-    name,
-    code,
-    type,
-    location,
-    organization,
-    status,
-    createdAt: '2026-08-10 10:00',
-    description: '观测资源描述信息',
-    capabilities: '具备数据采集与传输能力',
-    remark: '正常运行中',
-    interfaceAddress: 'https://api.example.com',
-    updatedAt: '2026-08-10 10:00',
-    // 示例能力列表
-    capabilityList: [
-      {
-        id: 1,
-        observableTarget: '城市交通、水体、植被',
-        observationElements: '温度、湿度、光照',
-        observationPrecision: '±0.5°C',
-        spatialResolution: '10m',
-        temporalResolution: '15分钟',
-        coverageRange: '全球',
-        monitoringFrequency: '每日4次',
-        workHours: '08:00-20:00',
-        environmentalLimits: '-20°C~50°C',
-        availableTime: '2025-01-01至今'
-      },
-      {
-        id: 2,
-        observableTarget: '大气污染监测',
-        observationElements: 'PM2.5、PM10、O3',
-        observationPrecision: '±5%',
-        spatialResolution: '1km',
-        temporalResolution: '1小时',
-        coverageRange: '华北地区',
-        monitoringFrequency: '实时',
-        workHours: '00:00-24:00',
-        environmentalLimits: '-10°C~40°C',
-        availableTime: '2025-06-01至今'
-      }
-    ]
-  }
+function resetPage() {
+  currentPage.value = 1
 }
-
-function resetPage() { currentPage.value = 1 }
 
 function refresh() {
   loading.value = true
@@ -228,7 +246,7 @@ function refresh() {
 }
 
 function handleSort({ prop, order }: { prop: string | null; order: 'ascending' | 'descending' | null }) {
-  sort.value = { prop: (prop ?? '') as keyof Resource | '', order }
+  sort.value = { prop: (prop ?? '') as keyof PlatformListItem | '', order }
 }
 
 function openCreate() {
@@ -237,50 +255,58 @@ function openCreate() {
   formVisible.value = true
 }
 
-function openEdit(resource: Resource) {
+function openEdit(resource: PlatformListItem) {
   formMode.value = 'edit'
-  editingResource.value = { ...resource }
-  formVisible.value = true
+  // 从list数据找到完整的metadata
+  const full = resources.value.find((r) => r.general.platformId === resource.platformId)
+  if (full) {
+    editingResource.value = { ...full }
+    formVisible.value = true
+  }
 }
 
-function openDetail(resource: Resource) {
-  selectedResource.value = { ...resource }
-  drawerVisible.value = true
+function openDetail(resource: PlatformListItem) {
+  const full = resources.value.find((r) => r.general.platformId === resource.platformId)
+  if (full) {
+    selectedResource.value = { ...full }
+    drawerVisible.value = true
+  }
 }
 
-function saveResource(resource: Resource) {
+function saveResource(resource: PlatformMetadata) {
   if (formMode.value === 'create') {
     resources.value.unshift(resource)
   } else {
-    const index = resources.value.findIndex((item) => item.id === resource.id)
+    const index = resources.value.findIndex((item) => item.general.platformId === resource.general.platformId)
     if (index >= 0) resources.value[index] = resource
   }
   resetPage()
   ElMessage.success(formMode.value === 'create' ? text.created : text.saved)
 }
 
-async function removeResource(resource: Resource) {
+async function removeResource(resource: PlatformListItem) {
   await ElMessageBox.confirm(text.deleteMessage, text.deleteTitle, {
     type: 'warning',
     confirmButtonText: text.deleteConfirm,
-    cancelButtonText: text.cancel
+    cancelButtonText: text.cancel,
   })
-  resources.value = resources.value.filter((item) => item.id !== resource.id)
+  resources.value = resources.value.filter((item) => item.general.platformId !== resource.platformId)
   ElMessage.success(text.deleted)
 }
 
-function typeLabel(type: Type) { return labels.type[type] }
-function statusLabel(status: Status) { return labels.status[status] }
-
-function typeTagType(type: Type) {
-  return type === 'satellite' ? 'primary' : type === 'platform' ? 'success' : type === 'sensor' ? 'warning' : 'info'
+function typeLabel(type: PlatformType) {
+  return getPlatformLabel(type)
 }
-
-function statusType(status: Status) {
-  return status === 'online' ? 'success' : status === 'offline' ? 'danger' : status === 'maintenance' ? 'warning' : 'info'
+function statusLabel(status: PlatformStatus) {
+  return getStatusLabel(status)
+}
+function typeTagType(type: PlatformType) {
+  return getPlatformTagType(type)
+}
+function statusType(status: PlatformStatus) {
+  return getStatusTagType(status)
 }
 </script>
-
 
 <template>
   <section class="resource-management">
@@ -290,11 +316,11 @@ function statusType(status: Status) {
         <el-input v-model="keyword" clearable :placeholder="text.search" @input="resetPage" />
 
         <el-select v-model="typeFilter" clearable :placeholder="text.type" @change="resetPage">
-          <el-option v-for="type in typeOptions" :key="type" :label="labels.type[type]" :value="type" />
+          <el-option v-for="item in typeOptions" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
 
         <el-select v-model="statusFilter" clearable :placeholder="text.status" @change="resetPage">
-          <el-option v-for="status in statusOptions" :key="status" :label="labels.status[status]" :value="status" />
+          <el-option v-for="item in statusOpts" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
 
         <el-select v-model="organizationFilter" clearable :placeholder="text.organization" @change="resetPage">
@@ -314,11 +340,11 @@ function statusType(status: Status) {
       height="100%"
       @sort-change="handleSort"
     >
-      <el-table-column prop="name" :label="text.name" min-width="150" sortable="custom" />
-      <el-table-column prop="code" :label="text.code" min-width="140" sortable="custom" />
-      <el-table-column prop="type" :label="text.typeColumn" width="110" sortable="custom">
+      <el-table-column prop="platformName" :label="text.name" min-width="150" sortable="custom" />
+      <el-table-column prop="platformCode" :label="text.code" min-width="140" sortable="custom" />
+      <el-table-column prop="platformType" :label="text.typeColumn" width="110" sortable="custom">
         <template #default="{ row }">
-          <el-tag :type="typeTagType(row.type)">{{ typeLabel(row.type) }}</el-tag>
+          <el-tag :type="typeTagType(row.platformType)">{{ typeLabel(row.platformType) }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="location" :label="text.location" min-width="140" sortable="custom" />
@@ -328,7 +354,17 @@ function statusType(status: Status) {
           <el-tag :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="createdAt" :label="text.createdAt" min-width="150" sortable="custom" />
+      <el-table-column prop="primaryMetric" :label="text.primaryMetric" min-width="120" sortable="custom">
+        <template #default="{ row }">
+          <span>{{ row.primaryMetric.value }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="secondaryMetric" :label="text.secondaryMetric" min-width="120" sortable="custom">
+        <template #default="{ row }">
+          <span>{{ row.secondaryMetric.value }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="deploymentDate" :label="text.createdAt" min-width="150" sortable="custom" />
       <el-table-column :label="text.actions" width="200" fixed="right">
         <template #default="{ row }">
           <div class="resource-management__actions">
@@ -355,11 +391,15 @@ function statusType(status: Status) {
     </div>
 
     <!-- 弹窗和抽屉 -->
-    <ResourceFormDialog v-model="formVisible" :mode="formMode" :resource="editingResource" @save="saveResource" />
+    <ResourceFormDialog
+      v-model="formVisible"
+      :mode="formMode"
+      :resource="editingResource"
+      @save="saveResource"
+    />
     <ResourceDetailDrawer v-model="drawerVisible" :resource="selectedResource" />
   </section>
 </template>
-
 
 <style scoped>
 .resource-management {

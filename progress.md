@@ -196,6 +196,20 @@
 - `progress.md`: recorded the architecture documentation deliverable.
 - Rollback: delete `docs/vue3-project-architecture.md` and remove this log entry.
 
+## 2026-08-18 - Task: Create layered Vue 3 technology architecture diagram
+### What was done
+- Added a layered architecture diagram matching the requested presentation style: view, compile, code, common utility, and data layers.
+- Mapped the diagram to the current Vue 3, Vite, Element Plus, Pinia, Cesium, Axios, local mock data, and reserved-but-unimplemented Router/API boundaries.
+
+### Testing
+- Checked the diagram labels and edges against `package.json`, `vite.config.ts`, the current `src/` directories, and the implemented import relationships.
+- No application code was changed.
+
+### Notes
+- `docs/vue3-technology-layered-architecture.md`: added the project technology layering diagram, layer mapping, and boundary notes.
+- `progress.md`: recorded the architecture documentation deliverable.
+- Rollback: delete `docs/vue3-technology-layered-architecture.md` and remove this log entry.
+
 ## 2026-08-18 - Task: Improve Mermaid preview contrast
 ### What was done
 - Added explicit light Mermaid theme variables to both architecture diagrams so they remain readable in VS Code dark mode.
@@ -208,3 +222,26 @@
 - `docs/vue3-project-architecture.md`: added light background, text, border, and line colors to both diagrams.
 - `progress.md`: recorded the preview contrast adjustment.
 - Rollback: remove the two `%%{init: ...}%%` lines and this log entry.
+
+## 2026-08-18 - Task: Create sensor platform capability files
+### What was done
+- Created the requested sensor platform type, config, and capability panel placeholder files.
+- Kept the new files as minimal placeholders without adding business behavior or wiring.
+
+### Testing
+- Verified all 11 requested file paths exist with `Test-Path`.
+
+### Notes
+- `src/modules/resource/sensor/types/platform.ts`: created the platform type module placeholder.
+- `src/modules/resource/sensor/config/platformConfig.ts`: created the platform config module placeholder.
+- `src/modules/resource/sensor/components/capability/index.ts`: created the capability component index placeholder.
+- `src/modules/resource/sensor/components/capability/SatellitePanel.vue`: created the satellite capability panel placeholder.
+- `src/modules/resource/sensor/components/capability/UavPanel.vue`: created the UAV capability panel placeholder.
+- `src/modules/resource/sensor/components/capability/GroundStationPanel.vue`: created the ground station capability panel placeholder.
+- `src/modules/resource/sensor/components/capability/RobotPanel.vue`: created the robot capability panel placeholder.
+- `src/modules/resource/sensor/components/capability/SurveyVehiclePanel.vue`: created the survey vehicle capability panel placeholder.
+- `src/modules/resource/sensor/components/capability/RfidMeshPanel.vue`: created the RFID mesh capability panel placeholder.
+- `src/modules/resource/sensor/components/capability/SmartphonePanel.vue`: created the smartphone capability panel placeholder.
+- `src/modules/resource/sensor/components/capability/VideoOpticalPanel.vue`: created the video optical capability panel placeholder.
+- `progress.md`: recorded this file creation task.
+- Rollback: delete the 11 newly created files, remove any empty directories left under `src/modules/resource/sensor/`, and remove this log entry.

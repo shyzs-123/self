@@ -5,6 +5,17 @@
     "types": ["vite/client"],
     "allowArbitraryExtensions": true,
 
+    /* ========== 路径别名（已优化） ========== */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    /* ========================================= */
+
+    /* ========== 忽略弃用警告 ========== */
+    "ignoreDeprecations": "6.0",
+    /* =================================== */
+
     /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
